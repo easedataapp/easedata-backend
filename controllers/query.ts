@@ -5,6 +5,7 @@ import { UserForJWTGeneration } from "../types/user";
 import { DataSourceType, HUB_SPOT_TABLES } from "../types/data-source";
 import {
   getHubSpotCompanies,
+  getHubSpotDeals,
   hubspotClient,
   makeObjectFromKeys,
   refreshAccessToken,
@@ -101,6 +102,7 @@ export const executeQuery = async ({ user, input }) => {
   const { data_source_id, table_name, fields, filters, sort } = input;
   const dataSource = await DataSource.get(data_source_id);
   if (dataSource.type === DataSourceType.HUB_SPOT) {
+    //TODO:Enhancements. Ideally we can have only one function for all the tables but for now keeping it separate.
     if (table_name === HUB_SPOT_TABLES.CONTACTS) {
       if (filters?.length) {
         const filteredContacts = await getFilteredObjects({
@@ -134,6 +136,23 @@ export const executeQuery = async ({ user, input }) => {
         fields,
       });
       return { data: companies };
+    }
+    if (table_name === HUB_SPOT_TABLES.DEALS) {
+      if (filters?.length) {
+        const filterDeals = await getFilteredObjects({
+          refreshToken: dataSource.refresh_token,
+          fields,
+          filters,
+          sort,
+          table_name,
+        });
+        return { data: filterDeals };
+      }
+      const deals = await getHubSpotDeals({
+        refreshToken: dataSource.refresh_token,
+        fields,
+      });
+      return { data: deals };
     }
   }
   return [];

@@ -1,5 +1,6 @@
 import { Client } from "@hubspot/api-client";
 import { DataSource, getMostRecentDataSource } from "../model/data-source";
+import { HUB_SPOT_TABLES } from "../types/data-source";
 export const hubspotClient = new Client({
   numberOfApiCallRetries: 3,
 });
@@ -83,10 +84,28 @@ export const getHubSpotCompanies = async ({ refreshToken, fields }) => {
   });
   return requiredFormatData;
 };
+export const getHubSpotDeals = async ({ refreshToken, fields }) => {
+  //ideally we can use the same access token un till it's not expired but here currently I am getting a new access token on each request.
+  await refreshAccessToken(refreshToken);
+  const limit = 100;
+  const after = "0";
+  const data = await hubspotClient.crm.deals.basicApi.getPage(
+    limit,
+    after,
+    fields
+  );
+  const requiredFormatData = data.results.map((result) => {
+    const primaryPropertiesObject = makeObjectFromKeys(
+      fields,
+      result.properties
+    );
+    return primaryPropertiesObject;
+  });
+  return requiredFormatData;
+};
 
-type HubSpotObject = "contacts" | "companies";
 type InputType = {
-  objectName: HubSpotObject;
+  objectName: HUB_SPOT_TABLES;
   dataSourceId: string;
 };
 const getFieldDataType = (type) => {
@@ -108,6 +127,22 @@ export const getAllImportantObjectProperties = async ({
   const dataSource = await DataSource.get(dataSourceId);
   await refreshAccessToken(dataSource.refresh_token);
   const data = await hubspotClient.crm.properties.coreApi.getAll(objectName);
+  if (objectName === HUB_SPOT_TABLES.DEALS) {
+    //In case of deals I am sending all properties because I am not sure which properties are important.
+    const importantProperties = data.results
+      .sort((a, b) => {
+        if (!a?.displayOrder || !b?.displayOrder) return 0;
+        return b.displayOrder - a.displayOrder;
+      })
+      .map((result) => {
+        return {
+          name: result.name,
+          label: result.label,
+          data_type: getFieldDataType(result.type),
+        };
+      });
+    return importantProperties;
+  }
   //TODO:this can be optimized
   const importantProperties = data.results
     .filter((result) => {
