@@ -4,13 +4,15 @@ import { HealthCheckResolver } from "./health-check";
 import { DataQueryResolver } from "./query";
 import { UserResolver } from "./user";
 import { WorkspaceResolver } from "./workspace";
+import { MSOfficeSheetAPIResolver } from "./ms-office-sheet-api";
 
 const resolvers = merge(
   UserResolver,
   HealthCheckResolver,
   WorkspaceResolver,
   DataQueryResolver,
-  DataSourceResolver
+  DataSourceResolver,
+  MSOfficeSheetAPIResolver
 );
 
 export default resolvers;
