@@ -10,6 +10,7 @@ import {
 } from "./hubspot";
 import { ApolloError } from "apollo-server-lambda";
 import axios from "axios";
+import { populateGSheet } from "./gsheeet";
 const DEFAULT_PAGE_SIZE = 100;
 
 interface DataQueryInput {
@@ -216,4 +217,13 @@ export const executeQuery = async ({ user, input, limit, after }) => {
     });
   }
   return [];
+};
+
+export const scheduleQuery = async (data: DataQueryInput) => {
+  const { user, input } = data;
+  console.log("input", input);
+  await populateGSheet();
+  return {
+    id: "1",
+  };
 };

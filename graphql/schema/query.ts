@@ -34,6 +34,7 @@ const queryTypeDef = gql`
   }
   type Mutation {
     createDataQuery(input: DataQueryInput!): DataQuery!
+    scheduleQuery(input: ScheduleQueryInput!): ScheduledQueryResponse!
   }
   input DataQueryInput {
     name: String!
@@ -100,6 +101,22 @@ const queryTypeDef = gql`
     has_previous_page: Boolean!
     start_cursor: String
     end_cursor: String
+  }
+  input ScheduleQueryInput {
+    query_id: String!
+    interval: Interval!
+    gsheet_url: String!
+  }
+  enum Interval {
+    EACH_MINUTE
+    EACH_HALF_HOUR
+    EACH_HOUR
+    EACH_DAY
+    EACH_WEEK
+    EACH_MONTH
+  }
+  type ScheduledQueryResponse {
+    id: ID!
   }
 `;
 

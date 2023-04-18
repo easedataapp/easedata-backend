@@ -3,6 +3,7 @@ import {
   executeQuery,
   getAQuery,
   getDataQueriesOfAWorkspace,
+  scheduleQuery,
 } from "../../controllers/query";
 
 export const DataQueryResolver = {
@@ -41,6 +42,14 @@ export const DataQueryResolver = {
         input: _args.input,
       });
       return createdQuery;
+    },
+    scheduleQuery: async (_parent, _args, ctx, _info) => {
+      const user = ctx.assertAuthenticated();
+      const scheduledQuery = await scheduleQuery({
+        user,
+        input: _args.input,
+      });
+      return scheduledQuery;
     },
   },
 };
