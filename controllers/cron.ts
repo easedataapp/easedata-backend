@@ -19,14 +19,6 @@ const getAllPaginatedData = async (query) => {
       data_source_id: query.data_source_id,
       table_name: query.table_name,
       fields: query.fields,
-      filters: [
-        {
-          field: "createdate",
-          operator: "BETWEEN",
-          value: "1680287400000",
-          high_value: "1682015400000",
-        },
-      ],
     },
     limit: 100,
     after: "0",
@@ -35,14 +27,14 @@ const getAllPaginatedData = async (query) => {
     const response = await executeQuery(requestBody);
     pageInfo = response.page_info;
     data.push(...response.data);
-    // while (pageInfo?.has_next_page) {
-    const result = await executeQuery({
-      ...requestBody,
-      after: pageInfo.end_cursor,
-    });
-    data.push(...result.data);
-    pageInfo = result.page_info;
-    // }
+    while (pageInfo?.has_next_page) {
+      const result = await executeQuery({
+        ...requestBody,
+        after: pageInfo.end_cursor,
+      });
+      data.push(...result.data);
+      pageInfo = result.page_info;
+    }
     console.log("Got all Data:: ", data.length);
     return data;
   } catch (e) {
@@ -52,17 +44,6 @@ const getAllPaginatedData = async (query) => {
   }
 };
 
-const mockAPI = async () => {
-  try {
-    const response = await axios.get(
-      "https://jsonplaceholder.typicode.com/todos"
-    );
-    return response.data;
-  } catch (err) {
-    console.log(`Error in mock API`, err);
-    return [];
-  }
-};
 export const runScheduleQuery = async (input: RunScheduleQueryArgs) => {
   console.log(`Running schedule query:: `, input);
   const { queryId, gSheetId } = input;
