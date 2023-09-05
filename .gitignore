@@ -2,3 +2,5 @@ node_modules
 .build
 .serverless
 .vscode
+./config/security.env.local
+config.bat
